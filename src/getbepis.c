@@ -120,7 +120,6 @@ typedef struct MetaList
           {                                                           \
             return ( typename* )(metadata);                           \
           }                                                           \
-
           return NULL;                                                \
         }                                                             \
 
@@ -459,7 +458,7 @@ static MetaList g_NonOptionArgumentStrings = { NULL, 0 };
 /* PRIVATE */              /* FUNCTIONS */              /* UTILITIES */
 /*********************************************************************/
 
-static int FindFirstSet(int dword)
+static int CTZ(int dword)
 {
   int i16 = ((dword & 0xFFFF) == 0 ? 1 : 0) << 4;
   dword >>= i16;
@@ -656,7 +655,7 @@ static void Throw(ERR_CODE code, const char* func, unsigned lineno)
 
   if (code > ERR_CODE_NONE)
   {
-    int idx = FindFirstSet((int)code) + 1;
+    int idx = CTZ((int)code) + 1;
     g_CurrentErrors |= (int)code;
 
     CString_FillFromInt32(s_BinaryBuffer, (unsigned)code);
@@ -754,10 +753,10 @@ int main(int argc, char* const* argv)
     { NULL,            0,                    NULL,                         0  }
   };
 
-  InitGlobalMemory(argv[0]);
-
   if (argc > 1)
   {
+    InitGlobalMemory(argv[0]);
+    
     bool run_tests = FALSE;
 
     while (TRUE)
@@ -821,12 +820,13 @@ int main(int argc, char* const* argv)
     {
       RunTests();
     }
+
+    FreeGlobalMemory();
   }
   else
   {
-    Hang();
+    PrintHelp();
   }
 
-  FreeGlobalMemory();
   return g_CurrentErrors;
 }
